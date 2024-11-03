@@ -1,0 +1,48 @@
+@keyframes fadeIn { /* defines the fading animation for text */
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@font-face {
+  font-family: flux;
+  src: url();
+}
+
+body {
+    background-color: black;
+    padding: auto;
+}
+/* defines the attributes of welcome text */
+.welcome {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.welcometxt {
+    text-align: center;
+    font-size: 3em;
+    color: rgba(255, 255, 255, 0.85);
+    animation: fadeIn 4s;
+}
+
+/* Defines the attributes of data collected from APOD api */
+.image {
+    align-self: center;
+    display: block;
+    margin-left: 50vh;
+    margin-right: 45vh;
+    width: 50%;
+    
+}
+
+.apodlabel {
+    text-align: right;
+    color:rgba(255, 255, 255, 0.85);
+}
+
+.apodexp {
+    text-align: left;
+    color: rgba(255, 255, 255, 0.7);
+}
