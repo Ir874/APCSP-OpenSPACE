@@ -1,32 +1,22 @@
-# imports for functionality
-import requests 
+import requests # allows HTTP requests 
+from apikeys import NASA, GAPI # external API keys
 import google.generativeai as genai # ai compiler
 import os
-# requests module -->  allows us to send/recieve packets to/from APIs
-# We use 3 APIs in this program; 2 NASA OpenAPIs, and a Google AI api SDK .
-# We extract information from the first 2 apis, and summarize using the Google API,
-# which is then presented to the user in a simple webpage.
 
 
-# NASA API config
-key = "S6Z5MD5j0b6RpnXaxVbBRderzcsSJwpTLLabatO1" # --> NASA API key
+# Google API config 
+MODEL = "gemini-1.5-flash"
+prompt = "Summarize the following text into 2 lines, prioritizing scientfic information, while keeping it simple enough for someone who is not an astronomer to understand. Make sure to include outstanding or visible details, explaining them also: "
 
-# Google API config --> migrate to openai after developing ai key
-genai.configure(api_key=os.environ["AIzaSyDtzwP93lpst_lOXwFR_0YhK-6OXrIXLMI"]) # --> Google ai API
-model = genai.GenerativeModel("gemini-1.5-flash") # --> generates stable model
-
-# function for passing text thru google openai library: -> 
-def summarize(inp):
-    pass
-
+def get_model(): # Initialize Google Gemini AI library to be callable
+    genai.configure(api_key=GAPI)
+    return genai.GenerativeModel(MODEL)
 
 # API ref dict
 apis = {
-    "apod" : "https://api.nasa.gov/planetary/apod?api_key="+ key 
-
+    "apod" : "https://api.nasa.gov/planetary/apod?api_key="+ NASA,
 
 }
-
 # check for API error codes
 rcodes = {
     200 : "Success",
@@ -38,37 +28,42 @@ rcodes = {
     503 : "Server not ready"
 }
 
-
-
 # Function blocks for parsing each API data
 def apod(data):
-    # This block appends apod data to data.txt
     f.write(i + ": \n")
-    print(data['date']) # date
-    f.write(str(data['url'] + "\n")) # url 
+    print(data['date']) 
+    f.write(str(data['url'] + "\n"))
     
-    imgexp = str(data['explanation']) # vaiable to store explanation
-    f.write(imgexp) # <-- writes explanation to data.txt
-
+    imgexp = str(data['explanation'])
+    f.write(imgexp) 
 
 f = open("data.txt", "w") # Opens data file in write-over mode
 
-for i in apis: # Runs through api list
-    
-    # GRABS DATA FROM API: I    
-    response = requests.get(apis[i]) # returns status code
-    respt = response.json() # Stores text values of api data as a dict
-    
-    # Delete this part after fully integrated -->
-    print(i + "-" + rcodes[response.status_code]) # prints status code 
-    print(respt['url']) 
-    # Delete this part after fully integrated <--
+def datagrab(api,api_key,param,prompt="",summarize=False): # --> Reusable function to grab data from API
+    with requests.Session() as session: # Initializes request session
 
-    # block to determine parsing func
-    if i == "apod":
-        apod(respt) # <-- passes dict of api response thru parsing function
-    else: pass
-    
+        for i in apis:
 
-# Call this line last, to enable full data writing
+            with session.get(api, params={"api_key": api_key}) as response: # Opens api
+                
+                response.raise_for_status() # Checks response ping
+                data = response.json()
+                
+                returnvalue = data.get(param) # Gets data from specific parameter, param
+                
+                if returnvalue and summarize: # If we want to summarize, summarize == True
+                    summarized = get_model().generate_content(prompt + returnvalue).text
+                    print(summarized)
+                    f.write(str(summarized+ "\n"))
+                elif summarize != True:
+                    print(returnvalue)
+                    f.write(str(returnvalue + "\n"))
+                else:
+                    print("Error: Runtime error")
+
+datagrab(apis['apod'],NASA,'url') # returns url of image
+datagrab(apis['apod'],NASA,'explanation')
+print("\n")
+datagrab(apis['apod'],NASA,'explanation',prompt,True) # returns summarized explanation of APOD image
+
 f.close() # Closes file to prevent accidental writing

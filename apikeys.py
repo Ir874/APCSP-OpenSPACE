@@ -1,0 +1,2 @@
+NASA="S6Z5MD5j0b6RpnXaxVbBRderzcsSJwpTLLabatO1"
+GAPI="AIzaSyC_MWfA_RT3FY9z44s5-a2iZ4vGHfluYak"
